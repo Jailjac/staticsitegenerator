@@ -27,32 +27,3 @@ class TextNode():
         
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
-
-def test_cases():
-    def test(func, params, expected):
-        actual = ""
-        try:
-            actual = func(*params)
-        except Exception as e:
-            actual = e
-        if expected == actual:
-            print("Test Successful")
-        else:
-            print("Test Failed")
-        print(f"Expected Result: \n{expected}")
-        print(f"Actual Result: \n{actual}")
-    
-    base = TextNode("Hello!", TextType.NORMAL)
-    eq_test1 = TextNode("Hello!", TextType.NORMAL)
-    eq_test2 = TextNode("Hello!", TextType.NORMAL, "google.com")
-    eq_test3 = "Hello!"
-    eq_test4 = TextNode("Goodbye!", TextType.NORMAL)
-    test(base.__eq__, [eq_test1], True)
-    test(base.__eq__, [eq_test2], False)
-    test(base.__eq__, [eq_test3], "Can't compare TextNode to <class 'str'>")
-    test(base.__eq__, [eq_test4], False)
-    test(base.__repr__, [], "TextNode(Hello!, normal, None)")
-
-        
-if __name__ == "__main__":
-    test_cases()
