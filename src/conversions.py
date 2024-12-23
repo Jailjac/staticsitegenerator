@@ -104,3 +104,83 @@ def markdown_to_blocks(markdown):
     blocks = markdown.split('\n\n')
     blocks = map(lambda s : s.strip().strip("\n"), blocks)
     return [s for s in blocks if s != ""]
+
+def block_to_block_type(block):
+    if block == "":
+        return "paragraph"
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+        return "heading"
+    if block[:3] == "```" and block[-3:] == "```":
+        return "code"
+    lines = block.split("\n")
+    if all(l[0] == ">" for l in lines):
+        return "quote"
+    if all(l[:2] == "* " or l[:2] == "- " for l in lines):
+        return "unordered_list"
+    if all(lines[i].startswith(f"{i + 1}. ") for i in range(len(lines))):
+        return "ordered_list"
+    return "paragraph"
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    organized_html = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        match block_type:
+            case "paragraph":
+                organized_html.append(paragraph_to_html(block))
+            case "heading":
+                organized_html.append(headings_to_html(block))
+            case "code":
+                organized_html.append(code_to_html(block))
+            case "quote":
+                organized_html.append(quote_to_html(block))
+            case "unordered_list":
+                organized_html.append(unordered_list_to_html(block))
+            case "ordered_list":
+                organized_html.append(ordered_list_to_html(block))
+    
+    return ParentNode("div", organized_html)
+
+    
+def paragraph_to_html(block):
+    nodes = text_to_nodes(block)
+    html = map(text_node_to_html_node, nodes)
+    return ParentNode("p", list(html))
+
+def headings_to_html(block):
+    i = 0
+    while block[i] == "#":
+        i += 1
+    nodes = text_to_nodes(block.lstrip("#").strip())
+    html = map(text_node_to_html_node, nodes)
+    return ParentNode(f"h{i}", list(html))
+
+def code_to_html(block):
+    nodes = text_to_nodes(block.strip("`"))
+    html = map(text_node_to_html_node, nodes)
+    return ParentNode("pre", [ParentNode("code", list(html))])
+
+def quote_to_html(block):
+    lines = block.split("\n")
+    nodes = text_to_nodes("\n".join(map(lambda l: l[1:], lines)))
+    html = map(text_node_to_html_node, nodes)
+    return ParentNode("blockquote", list(html))
+
+def unordered_list_to_html(block):
+    lines = block.split("\n")
+    list_html = []
+    for line in lines:
+        nodes = text_to_nodes(line[2:])
+        html = map(text_node_to_html_node, nodes)
+        list_html.append(ParentNode("li", list(html)))
+    return ParentNode("ul", list_html)
+
+def ordered_list_to_html(block):
+    lines = block.split("\n")
+    list_html = []
+    for line in lines:
+        nodes = text_to_nodes(line.split(". ")[1])
+        html = map(text_node_to_html_node, nodes)
+        list_html.append(ParentNode("li", list(html)))
+    return ParentNode("ol", list_html)

@@ -286,6 +286,85 @@ class TestMarkdownToBlocks(unittest.TestCase):
         ]
         self.assertEqual(markdown_to_blocks(text), expect)
 
+class TestBlockToBlockType(unittest.TestCase):
+    def test_btbt_empty(self):
+        block = ""
+        self.assertEqual(block_to_block_type(block), "paragraph")
+    
+    def test_btbt_heading(self):
+        block = "# heading"
+        self.assertEqual(block_to_block_type(block), "heading")
+
+    def test_btbt_code(self):
+        block = "```code```"
+        self.assertEqual(block_to_block_type(block), "code")
+    
+    def test_btbt_code_fake(self):
+        block = "```code``"
+        self.assertEqual(block_to_block_type(block), "paragraph")
+
+    def test_btbt_quote(self):
+        block = ">quote1\n>quote2"
+        self.assertEqual(block_to_block_type(block), "quote")
+
+    def test_btbt_quote_fake(self):
+        block = ">quote1\nquote2"
+        self.assertEqual(block_to_block_type(block), "paragraph")
+
+    def test_btbt_unordered_list(self):
+        block = "* list1\n* list2"
+        self.assertEqual(block_to_block_type(block), "unordered_list")
+
+    def test_btbt_unordered_list_fake(self):
+        block = "* list1\n*list2"
+        self.assertEqual(block_to_block_type(block), "paragraph")
+
+    def test_btbt_ordered_list(self):
+        block = "1. list1\n2. list2"
+        self.assertEqual(block_to_block_type(block), "ordered_list")
+
+    def test_btbt_ordered_list_fake(self):
+        block = "1. list1\n1. list2"
+        self.assertEqual(block_to_block_type(block), "paragraph")
+
+    def test_btbt_ordered_list_12(self):
+        block = ""
+        for i in range(12):
+            block += f"{i+1}. "
+        self.assertEqual(block_to_block_type(block), "ordered_list")
+
+    def test_btbt_paragraph(self):
+        block = "This is a paragraph.\nNothing special"
+        self.assertEqual(block_to_block_type(block), "paragraph")
+
+class TestMarkdownToHTML(unittest.TestCase):
+    def test_mthtml_full(self):
+        text = """### This is a *heading*
+
+This is a paragraph.
+It takes up **multiple** lines.
+It includes `code` too.
+
+>This is a quote.
+>**I'm a big fan!**
+
+``` This is all code
+It starts as code
+and ends as code ```
+
+* Eggs
+* Cheese
+* Waffles
+* **Bread**
+
+1. First Item
+2. Second Item
+3. Third Item"""
+
+        expect = "<div><h3>This is a <i>heading</i></h3><p>This is a paragraph.\nIt takes up <b>multiple</b> lines.\nIt includes <code>code</code> too.</p><blockquote>This is a quote.\n<b>I'm a big fan!</b></blockquote><pre><code> This is all code\nIt starts as code\nand ends as code </code></pre><ul><li>Eggs</li><li>Cheese</li><li>Waffles</li><li><b>Bread</b></li></ul><ol><li>First Item</li><li>Second Item</li><li>Third Item</li></ol></div>"
+        self.maxDiff = None
+        self.assertEqual(markdown_to_html_node(text).to_html(), expect)
+
 
 if __name__ == "__main__":
     print("Testing Conversions")
