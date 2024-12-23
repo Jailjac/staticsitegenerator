@@ -63,4 +63,5 @@ class TestParentNode(unittest.TestCase):
 
     
 if __name__ == "__main__":
+    print("Testing HTML")
     unittest.main()
