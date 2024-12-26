@@ -345,8 +345,8 @@ This is a paragraph.
 It takes up **multiple** lines.
 It includes `code` too.
 
->This is a quote.
->**I'm a big fan!**
+> This is a quote.
+> **I'm a big fan!**
 
 ``` This is all code
 It starts as code
@@ -364,6 +364,21 @@ and ends as code ```
         expect = "<div><h3>This is a <i>heading</i></h3><p>This is a paragraph.\nIt takes up <b>multiple</b> lines.\nIt includes <code>code</code> too.</p><blockquote>This is a quote.\n<b>I'm a big fan!</b></blockquote><pre><code> This is all code\nIt starts as code\nand ends as code </code></pre><ul><li>Eggs</li><li>Cheese</li><li>Waffles</li><li><b>Bread</b></li></ul><ol><li>First Item</li><li>Second Item</li><li>Third Item</li></ol></div>"
         self.maxDiff = None
         self.assertEqual(markdown_to_html_node(text).to_html(), expect)
+
+class TestExtractTitle(unittest.TestCase):
+    def test_one_line(self):
+        text = "# Title"
+        self.assertEqual(extract_title(text), "Title")
+
+    def test_no_title(self):
+        text = "Title"
+        with self.assertRaises(Exception) as err:
+            extract_title(text)
+        self.assertEqual(str(err.exception), "No Title Found")
+
+    def test_mutli_line(self):
+        text = "paragraph\ncode\n# Title"
+        self.assertEqual(extract_title(text), "Title")
 
 
 if __name__ == "__main__":

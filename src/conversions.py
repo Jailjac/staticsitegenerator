@@ -163,7 +163,7 @@ def code_to_html(block):
 
 def quote_to_html(block):
     lines = block.split("\n")
-    nodes = text_to_nodes("\n".join(map(lambda l: l[1:], lines)))
+    nodes = text_to_nodes("\n".join(map(lambda l: l[1:].lstrip(), lines)))
     html = map(text_node_to_html_node, nodes)
     return ParentNode("blockquote", list(html))
 
@@ -184,3 +184,11 @@ def ordered_list_to_html(block):
         html = map(text_node_to_html_node, nodes)
         list_html.append(ParentNode("li", list(html)))
     return ParentNode("ol", list_html)
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    for line in lines:
+        if line.strip().startswith("# "):
+            return line.strip()[2:]
+    
+    raise Exception("No Title Found")
